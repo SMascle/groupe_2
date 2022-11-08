@@ -6,7 +6,7 @@
 void ofApp::setup(){
 
 	ofBackground(34, 34, 34);
-	
+	title.load("title.png");
 	int bufferSize		= 512;
 	sampleRate 			= 44100;
 	phase 				= 0;
@@ -78,11 +78,14 @@ void ofApp::update(){
 
 }
 
+
+
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+	
 	ofSetColor(0, 255, 0);
 	ofBackground(0);
+	title.draw(0, 0);
 	ofDrawBitmapString("Synthesizer ARTEK808 v0.5", 32, 32);
 	ofDrawBitmapString("Press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
 	ofDrawBitmapString("\nPress 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
