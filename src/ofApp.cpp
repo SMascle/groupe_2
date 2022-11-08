@@ -1,4 +1,6 @@
 #include "ofApp.h"
+#include <complex>  // besoin pour la transformée de Fourier
+
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -15,10 +17,12 @@ void ofApp::setup(){
 	signal_type         = 0;
 
 
-	Audio.assign(bufferSize, 0.0);
 	t_start = 0;
 	n_harmonics = 10;
 
+	audio.assign(bufferSize, 0.0);
+	carre.assign(bufferSize, 0.0);
+	fftA.assign (bufferSize, 0.0);  //sebastien pour Fourier
 	
 	soundStream.printDeviceList();
 
@@ -108,7 +112,7 @@ void ofApp::draw(){
 	ofPopStyle();
 
 
-	// draw the right channel:
+	// draw the right channel:       // sebastien a mit son code pour la transformée de Fourier en affichage
 	/*
 	ofPushStyle();
 		ofPushMatrix();
@@ -120,13 +124,18 @@ void ofApp::draw(){
 		ofSetLineWidth(1);	
 		ofDrawRectangle(0, 0, 900, 200);
 
-		ofSetColor(245, 58, 135);
+		ofSetColor(145, 958, 35); // changement couleur
 		ofSetLineWidth(3);
 					
 			ofBeginShape();
-			for (unsigned int i = 0; i < rAudio.size(); i++){
-				float x =  ofMap(i, 0, rAudio.size(), 0, 900, true);
-				ofVertex(x, 100 -rAudio[i]*180.0f);
+
+			// appliquer la fft
+			fft(lAudio, sampleRate);
+			// cout << fftA[0] << endl;
+
+			for (unsigned int i = 0; i < fftA.size(); i++){
+				float x =  ofMap(i, 0, fftA.size(), 0, 900, true);
+				ofVertex(x, 100 - fftA[i]*720000000.0f);   // changer la constante en .0f pour avoir une échelle souhaitable
 			}
 			ofEndShape(false);
 			
@@ -294,11 +303,11 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			}
 		
 			if (S>1){
-				Audio[t] = buffer[t*buffer.getNumChannels()    ] = 1;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = 1;
 			}else if (S<-1){
-				Audio[t] = buffer[t*buffer.getNumChannels()    ] = -1;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = -1;
 			}else{
-				Audio[t] = buffer[t*buffer.getNumChannels()    ] = S;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = S;
 			}
 		}
 		t_start = t_start+buffer.getNumFrames();
@@ -314,11 +323,11 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			}
 		
 			if (S>1){
-				Audio[t] = buffer[t*buffer.getNumChannels()    ] = 1;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = 1;
 			}else if (S<-1){
-				Audio[t] = buffer[t*buffer.getNumChannels()    ] = -1;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = -1;
 			}else{
-				Audio[t] = buffer[t*buffer.getNumChannels()    ] = S;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = S;
 			}
 		}
 		t_start = t_start+buffer.getNumFrames();
@@ -348,4 +357,23 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
+}
+//-----   Transformée de Fourier 
+void ofApp::fft(vector <float >lAudio, float sampleRate){
+    int maxVal = lAudio.size();
+    // fftA.assign (maxVal, 0.0);
+    const float pi = std::acos(-1);
+    const std::complex<float> i(0, 1);
+
+    for (int f = 0; f < maxVal; f++){
+        float ff = float(f) / static_cast<float>(2 * maxVal); // vu qu'on divise et multiplie par samplerate dans tt et ff; autant les changer
+		 													 // plus besoin de tt à la place de t, et plus de samplerate dans la formule de ff
+        std::complex<float> integral (0.0,0.0);
+
+        for(int t = 0; t < maxVal; t++){
+            integral += lAudio[t]  * std::exp(-2 * pi * i * ff * float(t) ) / sampleRate;
+			//cout << ff << " "<< integral <<" " << tt << endl;
+        }
+        fftA[f] = std::norm(integral);
+    }
 }

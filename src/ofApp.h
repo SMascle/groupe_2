@@ -41,11 +41,11 @@ class ofApp : public ofBaseApp{
 		vector <float> audio;
 		vector <float> carre;
 
-
 		
 		//------------------- for the simple sine wave synthesis
 		float 	targetFrequency;
 		float 	phase;
 		float 	phaseAdder;
 		float 	phaseAdderTarget;
+		float   ff; // ajout floatant ff
 };
