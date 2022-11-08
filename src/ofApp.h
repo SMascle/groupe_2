@@ -23,7 +23,7 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		
 		void audioOut(ofSoundBuffer & buffer);
-		
+		void fft(vector <float >lAudio, float sampleRate); // ajout fonction fft
 		
 		ofSoundStream soundStream;
 
@@ -35,11 +35,12 @@ class ofApp : public ofBaseApp{
 
 		vector <float> Audio;
 		vector <float> carre;
-
+		vector <float> fftA; // Ajout ici pour la transformée de Fourier
 		
 		//------------------- for the simple sine wave synthesis
 		float 	targetFrequency;
 		float 	phase;
 		float 	phaseAdder;
 		float 	phaseAdderTarget;
+		float   ff; // ajout floatant ff
 };
