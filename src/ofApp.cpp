@@ -14,7 +14,7 @@ void ofApp::setup(){
 	bNoise 				= false;
 	carre_bool 			= false;
 
-	Audio.assign(bufferSize, 0.0);
+	audio.assign(bufferSize, 0.0);
 	carre.assign(bufferSize, 0.0);
 	
 	soundStream.printDeviceList();
@@ -269,7 +269,7 @@ void ofApp::mouseExited(int x, int y){
 }
 
 //--------------------------------------------------------------
-void mouseScrolled(int x, int y, float scrollX, float scrollY){
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
 
 }
 //--------------------------------------------------------------
