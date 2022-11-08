@@ -91,9 +91,9 @@ void ofApp::draw(){
 		ofSetLineWidth(3);
 					
 			ofBeginShape();
-			for (unsigned int i = 0; i < Audio.size(); i++){
-				float x =  ofMap(i, 0, Audio.size(), 0, 900, true);
-				ofVertex(x, 100 -Audio[i]*180.0f);
+			for (unsigned int i = 0; i < audio.size(); i++){
+				float x =  ofMap(i, 0, audio.size(), 0, 900, true);
+				ofVertex(x, 100 -audio[i]*180.0f);
 			}
 			ofEndShape(false);
 			
@@ -232,6 +232,10 @@ void ofApp::mouseExited(int x, int y){
 }
 
 //--------------------------------------------------------------
+void mouseScrolled(int x, int y, float scrollX, float scrollY){
+
+}
+//--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
 
 }
@@ -251,7 +255,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 	if ( bNoise == true){
 		// ---------------------- noise --------------
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
-			Audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
+			audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
 			
 		}
 	} else {
@@ -259,7 +263,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
 			phase += phaseAdder;
 			float sample = sin(phase);
-			Audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
+			audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
 
 		}
 	}

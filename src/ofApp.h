@@ -23,16 +23,18 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		
 		void audioOut(ofSoundBuffer & buffer);
-		
+		void mouseScrolled(int x, int y, float scrollX, float scrollY);
+		void fft(vector <float audio>, float sampleRate);
 		
 		ofSoundStream soundStream;
 
+		vector <float> fftA;
 		float 	pan;
 		int		sampleRate;
 		bool 	bNoise;
 		float 	volume;
 
-		vector <float> Audio;
+		vector <float> audio;
 
 		
 		//------------------- for the simple sine wave synthesis
