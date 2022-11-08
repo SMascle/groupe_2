@@ -37,6 +37,8 @@ class ofApp : public ofBaseApp{
 		float   t_start;
 		size_t 	n_harmonics;
 
+		int filter;
+		vector <float> vfilter;
 
 		vector <float> audio;
 		vector <float> carre;
