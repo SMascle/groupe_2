@@ -31,7 +31,9 @@ class ofApp : public ofBaseApp{
 		int		sampleRate;
 		bool 	bNoise;
 		float 	volume;
-		bool 	carre_bool;
+		int 	signal_type;
+		float   t_start;
+		size_t 	n_harmonics;
 
 		vector <float> Audio;
 		vector <float> carre;
