@@ -81,10 +81,11 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofSetColor(225);
-	ofDrawBitmapString("Synthétiseur ARTEK808 v0.1", 32, 32);
+	ofSetColor(0, 255, 0);
+	ofBackground(0);
+	ofDrawBitmapString("Synthesizer ARTEK808 v0.5", 32, 32);
 	ofDrawBitmapString("Press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
-	ofDrawBitmapString("\nPress 'W', 'X', 'C', 'V','B','N', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
+	ofDrawBitmapString("\nPress 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
 	ofDrawBitmapString("\nPress 'q' for activate harmonies", 32, 118);
 	ofDrawBitmapString("\nPress 'f' for desactivate harmonies", 32, 131);
 	
@@ -115,8 +116,8 @@ void ofApp::draw(){
 	ofPopStyle();
 
 
-	// draw the right channel:       // sebastien a mit son code pour la transformée de Fourier en affichage
-	/*
+	// draw the right channel:       
+	// sebastien a mit son code pour la transformée de Fourier en affichage
 	ofPushStyle();
 		ofPushMatrix();
 		ofTranslate(32, 350, 0);
@@ -133,7 +134,7 @@ void ofApp::draw(){
 			ofBeginShape();
 
 			// appliquer la fft
-			fft(lAudio, sampleRate);
+			fft(audio, sampleRate);
 			// cout << fftA[0] << endl;
 
 			for (unsigned int i = 0; i < fftA.size(); i++){
@@ -144,7 +145,7 @@ void ofApp::draw(){
 			
 		ofPopMatrix();
 	ofPopStyle();
-	*/
+
 		
 	ofSetColor(225);
 	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
@@ -288,8 +289,16 @@ void ofApp::mouseExited(int x, int y){
 
 //--------------------------------------------------------------
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
+	if (scrollY == -1.){
+		volume -= 0.05;
+		volume = MAX(volume, 0);
+	} else if (scrollY == 1.){
+		volume += 0.05;
+		volume = MIN(volume, 1);
 
+	}
 }
+
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
 
@@ -365,24 +374,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 		}
 	}
 
-	if(filter=2){
-		for (int i=0; i < Audio.size() ; i++){
-			vfilter[i] = 0;
-		}
-		for (int i=0; i > Audio.size()*0.3; i++){
-			vfilter[i] = 1;
-			Audio[i] = Audio[i] * vfilter[i];
-		}
-	}
-	else if (filter=1){
-		for (int i=0; i< Audio.size(); i++){
-			vfilter[i] = 0;
-		}
-		for (int i=0; i< Audio.size()*0.3; i++){
-			vfilter[i] = 1;
-			Audio[i] = Audio[i] * vfilter[i];
-		}
-	}
+
 
 }
 
@@ -395,9 +387,10 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
 }
+
 //-----   Transformée de Fourier 
-void ofApp::fft(vector <float >lAudio, float sampleRate){
-    int maxVal = lAudio.size();
+void ofApp::fft(vector <float >audio, float sampleRate){
+    int maxVal = audio.size();
     // fftA.assign (maxVal, 0.0);
     const float pi = std::acos(-1);
     const std::complex<float> i(0, 1);
@@ -408,7 +401,7 @@ void ofApp::fft(vector <float >lAudio, float sampleRate){
         std::complex<float> integral (0.0,0.0);
 
         for(int t = 0; t < maxVal; t++){
-            integral += lAudio[t]  * std::exp(-2 * pi * i * ff * float(t) ) / sampleRate;
+            integral += audio[t]  * std::exp(-2 * pi * i * ff * float(t) ) / sampleRate;
 			//cout << ff << " "<< integral <<" " << tt << endl;
         }
         fftA[f] = std::norm(integral);
