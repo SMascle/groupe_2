@@ -24,7 +24,7 @@ class ofApp : public ofBaseApp{
 		
 		void audioOut(ofSoundBuffer & buffer);
 		void mouseScrolled(int x, int y, float scrollX, float scrollY);
-		void fft(vector <float audio>, float sampleRate);
+		void fft(vector <float> audio, float sampleRate);
 		
 		ofSoundStream soundStream;
 

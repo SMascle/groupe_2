@@ -13,7 +13,7 @@ void ofApp::setup(){
 	volume				= 0.1f;
 	bNoise 				= false;
 
-	Audio.assign(bufferSize, 0.0);
+	audio.assign(bufferSize, 0.0);
 	
 	soundStream.printDeviceList();
 
@@ -232,7 +232,7 @@ void ofApp::mouseExited(int x, int y){
 }
 
 //--------------------------------------------------------------
-void mouseScrolled(int x, int y, float scrollX, float scrollY){
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
 
 }
 //--------------------------------------------------------------
