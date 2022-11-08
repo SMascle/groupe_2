@@ -1,0 +1,36 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "exception": "cpp",
+        "initializer_list": "cpp",
+        "iosfwd": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "new": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "stdexcept": "cpp",
+        "streambuf": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "typeinfo": "cpp"
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/sebastien.mascle@Digital-Grenoble.local/Data+/Math_C++/OF/examples/sound/groupe_2/bin",
+            "binaryPath": "/home/sebastien.mascle@Digital-Grenoble.local/Data+/Math_C++/OF/examples/sound/groupe_2/bin/groupe_2",
+            "binaryArgs": []
+        }
+    ]
+}
