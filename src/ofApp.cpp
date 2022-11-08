@@ -72,9 +72,11 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	ofSetColor(225);
-	ofDrawBitmapString("AUDIO OUTPUT EXAMPLE", 32, 32);
-	ofDrawBitmapString("press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
-	ofDrawBitmapString("\npress one key between WXCVBN, for a note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
+	ofDrawBitmapString("Synthétiseur ARTEK808 v0.1", 32, 32);
+	ofDrawBitmapString("Press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
+	ofDrawBitmapString("\nPress 'W', 'X', 'C', 'V','B','N', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
+	ofDrawBitmapString("\nPress 'q' for activate harmonies", 32, 118);
+	ofDrawBitmapString("\nPress 'f' for desactivate harmonies", 32, 131);
 	
 	ofNoFill();
 	
@@ -108,7 +110,7 @@ void ofApp::draw(){
 		ofTranslate(32, 150, 0);
 			
 		ofSetColor(225);
-		ofDrawBitmapString("Left Channel", 4, 18);
+		ofDrawBitmapString("Audio_Output", 4, 18);
 		
 		ofSetLineWidth(1);	
 		ofDrawRectangle(0, 0, 900, 200);
@@ -154,12 +156,12 @@ void ofApp::draw(){
 	*/
 		
 	ofSetColor(225);
-	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
-	if( !bNoise ){
-		reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
-	}else{
-		reportString += "noise";	
-	}
+	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
+	//if( !bNoise ){
+	//	reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
+	//}else{
+	//	reportString += "noise";	
+	//}
 	ofDrawBitmapString(reportString, 32, 579);
 
 }
