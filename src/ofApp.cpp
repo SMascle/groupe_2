@@ -14,9 +14,11 @@ void ofApp::setup(){
 	bNoise 				= false;
 	signal_type         = 0;
 
+
 	Audio.assign(bufferSize, 0.0);
 	t_start = 0;
 	n_harmonics = 10;
+
 	
 	soundStream.printDeviceList();
 
@@ -73,9 +75,11 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	ofSetColor(225);
-	ofDrawBitmapString("AUDIO OUTPUT EXAMPLE", 32, 32);
-	ofDrawBitmapString("press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
-	ofDrawBitmapString("\npress one key between WXCVBN, for a note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
+	ofDrawBitmapString("Synthétiseur ARTEK808 v0.1", 32, 32);
+	ofDrawBitmapString("Press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
+	ofDrawBitmapString("\nPress 'W', 'X', 'C', 'V','B','N', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
+	ofDrawBitmapString("\nPress 'q' for activate harmonies", 32, 118);
+	ofDrawBitmapString("\nPress 'f' for desactivate harmonies", 32, 131);
 	
 	ofNoFill();
 	
@@ -85,7 +89,7 @@ void ofApp::draw(){
 		ofTranslate(32, 150, 0);
 			
 		ofSetColor(225);
-		ofDrawBitmapString("Left Channel", 4, 18);
+		ofDrawBitmapString("Audio_Output", 4, 18);
 		
 		ofSetLineWidth(1);	
 		ofDrawRectangle(0, 0, 900, 200);
@@ -94,9 +98,9 @@ void ofApp::draw(){
 		ofSetLineWidth(3);
 					
 			ofBeginShape();
-			for (unsigned int i = 0; i < Audio.size(); i++){
-				float x =  ofMap(i, 0, Audio.size(), 0, 900, true);
-				ofVertex(x, 100 -Audio[i]*180.0f);
+			for (unsigned int i = 0; i < audio.size(); i++){
+				float x =  ofMap(i, 0, audio.size(), 0, 900, true);
+				ofVertex(x, 100 -audio[i]*180.0f);
 			}
 			ofEndShape(false);
 			
@@ -131,12 +135,12 @@ void ofApp::draw(){
 	*/
 		
 	ofSetColor(225);
-	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
-	if( !bNoise ){
-		reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
-	}else{
-		reportString += "noise";	
-	}
+	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
+	//if( !bNoise ){
+	//	reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
+	//}else{
+	//	reportString += "noise";	
+	//}
 	ofDrawBitmapString(reportString, 32, 579);
 
 }
@@ -257,6 +261,10 @@ void ofApp::mouseExited(int x, int y){
 }
 
 //--------------------------------------------------------------
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
+
+}
+//--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
 
 }
@@ -317,7 +325,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 	}else if ( bNoise == true){
 		// ---------------------- noise --------------
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
-			Audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
+			audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
 			
 		}
 	} else {
@@ -325,7 +333,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
 			phase += phaseAdder;
 			float sample = sin(phase);
-			Audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
+			audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
 
 		}
 	}
