@@ -13,8 +13,7 @@ void ofApp::setup(){
 	volume				= 0.1f;
 	bNoise 				= false;
 
-	lAudio.assign(bufferSize, 0.0);
-	rAudio.assign(bufferSize, 0.0);
+	Audio.assign(bufferSize, 0.0);
 	
 	soundStream.printDeviceList();
 
@@ -62,7 +61,6 @@ void ofApp::setup(){
 	// use ofFmodSetBuffersize(bufferSize) to set the buffersize in fmodx prior to loading a file.
 }
 
-
 //--------------------------------------------------------------
 void ofApp::update(){
 
@@ -73,7 +71,8 @@ void ofApp::draw(){
 
 	ofSetColor(225);
 	ofDrawBitmapString("AUDIO OUTPUT EXAMPLE", 32, 32);
-	ofDrawBitmapString("press 's' to unpause the audio\npress 'e' to pause the audio", 31, 92);
+	ofDrawBitmapString("press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
+	ofDrawBitmapString("\npress one key between WXCVBN, for a note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
 	
 	ofNoFill();
 	
@@ -92,9 +91,9 @@ void ofApp::draw(){
 		ofSetLineWidth(3);
 					
 			ofBeginShape();
-			for (unsigned int i = 0; i < lAudio.size(); i++){
-				float x =  ofMap(i, 0, lAudio.size(), 0, 900, true);
-				ofVertex(x, 100 -lAudio[i]*180.0f);
+			for (unsigned int i = 0; i < Audio.size(); i++){
+				float x =  ofMap(i, 0, Audio.size(), 0, 900, true);
+				ofVertex(x, 100 -Audio[i]*180.0f);
 			}
 			ofEndShape(false);
 			
@@ -102,6 +101,7 @@ void ofApp::draw(){
 	ofPopStyle();
 
 	// draw the right channel:
+	/*
 	ofPushStyle();
 		ofPushMatrix();
 		ofTranslate(32, 350, 0);
@@ -124,7 +124,7 @@ void ofApp::draw(){
 			
 		ofPopMatrix();
 	ofPopStyle();
-	
+	*/
 		
 	ofSetColor(225);
 	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
@@ -136,7 +136,6 @@ void ofApp::draw(){
 	ofDrawBitmapString(reportString, 32, 579);
 
 }
-
 
 //--------------------------------------------------------------
 void ofApp::keyPressed  (int key){
@@ -156,6 +155,35 @@ void ofApp::keyPressed  (int key){
 		soundStream.stop();
 	}
 	
+	if( key == 'w' ){
+		//do 261.6
+		targetFrequency = 261.6;
+	}
+	if( key == 'x' ){
+		//re 293.7
+		targetFrequency = 293.7;
+	}
+	if( key == 'c' ){
+		//mi 329.6
+		targetFrequency = 329.6;
+	}
+	if( key == 'v' ){
+		//fa 349.2
+		targetFrequency = 349.2;
+	}
+	if( key == 'b' ){
+		//sol 392
+		targetFrequency = 392.0;
+	}
+	if( key == 'n' ){
+		//la 440
+		targetFrequency = 440.0;
+	}
+	if( key == ',' ){
+		//si 493.9
+		targetFrequency = 493.9;
+	}
+	phaseAdderTarget = (targetFrequency / (float) sampleRate) * TWO_PI;
 }
 
 //--------------------------------------------------------------
@@ -165,25 +193,28 @@ void ofApp::keyReleased  (int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
+/*
 	int width = ofGetWidth();
 	pan = (float)x / (float)width;
 	float height = (float)ofGetHeight();
 	float heightPct = ((height-y) / height);
 	targetFrequency = 2000.0f * heightPct;
 	phaseAdderTarget = (targetFrequency / (float) sampleRate) * TWO_PI;
+*/	
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
+	/*
 	int width = ofGetWidth();
 	pan = (float)x / (float)width;
+*/
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 	bNoise = true;
 }
-
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
@@ -208,8 +239,8 @@ void ofApp::windowResized(int w, int h){
 //--------------------------------------------------------------
 void ofApp::audioOut(ofSoundBuffer & buffer){
 	//pan = 0.5f;
-	float leftScale = 1 - pan;
-	float rightScale = pan;
+	//float leftScale = 1 - pan;
+	//float rightScale = pan;
 
 	// sin (n) seems to have trouble when n is very large, so we
 	// keep phase in the range of 0-TWO_PI like this:
@@ -220,16 +251,16 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 	if ( bNoise == true){
 		// ---------------------- noise --------------
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
-			lAudio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume * leftScale;
-			rAudio[i] = buffer[i*buffer.getNumChannels() + 1] = ofRandom(0, 1) * volume * rightScale;
+			Audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
+			
 		}
 	} else {
 		phaseAdder = 0.95f * phaseAdder + 0.05f * phaseAdderTarget;
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
 			phase += phaseAdder;
 			float sample = sin(phase);
-			lAudio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume * leftScale;
-			rAudio[i] = buffer[i*buffer.getNumChannels() + 1] = sample * volume * rightScale;
+			Audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
+
 		}
 	}
 

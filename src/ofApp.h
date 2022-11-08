@@ -32,8 +32,8 @@ class ofApp : public ofBaseApp{
 		bool 	bNoise;
 		float 	volume;
 
-		vector <float> lAudio;
-		vector <float> rAudio;
+		vector <float> Audio;
+
 		
 		//------------------- for the simple sine wave synthesis
 		float 	targetFrequency;

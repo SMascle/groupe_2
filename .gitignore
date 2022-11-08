@@ -3,6 +3,8 @@
 # but not the data folder
 ###########################
 
+bin/*
+obj/*
 */bin/*
 !*/bin/data/
 
