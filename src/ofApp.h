@@ -31,8 +31,10 @@ class ofApp : public ofBaseApp{
 		int		sampleRate;
 		bool 	bNoise;
 		float 	volume;
+		bool 	carre_bool;
 
 		vector <float> Audio;
+		vector <float> carre;
 
 		
 		//------------------- for the simple sine wave synthesis
