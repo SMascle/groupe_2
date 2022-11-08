@@ -22,7 +22,7 @@ obj/*
 *.pyc
 .svn/
 *.log
-
+.vscode
 ########################
 # IDE files which should
 # be ignored

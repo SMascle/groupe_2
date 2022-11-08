@@ -23,20 +23,24 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		
 		void audioOut(ofSoundBuffer & buffer);
-		
+		void mouseScrolled(int x, int y, float scrollX, float scrollY);
+		void fft(vector <float> audio, float sampleRate);
 		
 		ofSoundStream soundStream;
 
+		vector <float> fftA;
 		float 	pan;
 		int		sampleRate;
 		bool 	bNoise;
 		float 	volume;
-		bool 	carre_bool;
+		int 	signal_type;
+		float   t_start;
+		size_t 	n_harmonics;
 
 		int filter;
 		vector <float> vfilter;
 
-		vector <float> Audio;
+		vector <float> audio;
 		vector <float> carre;
 
 		
@@ -45,4 +49,5 @@ class ofApp : public ofBaseApp{
 		float 	phase;
 		float 	phaseAdder;
 		float 	phaseAdderTarget;
+		float   ff; // ajout floatant ff
 };

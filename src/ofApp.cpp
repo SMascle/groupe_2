@@ -1,4 +1,6 @@
 #include "ofApp.h"
+#include <complex>  // besoin pour la transformée de Fourier
+
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -12,13 +14,18 @@ void ofApp::setup(){
 	phaseAdderTarget 	= 0.0f;
 	volume				= 0.1f;
 	bNoise 				= false;
-	carre_bool 			= false;
+	signal_type         = 0;
+
+
+	t_start = 0;
+	n_harmonics = 10;
 
 	filter				=0;
 	vfilter.assign(bufferSize, 0.0);
 
-	Audio.assign(bufferSize, 0.0);
+	audio.assign(bufferSize, 0.0);
 	carre.assign(bufferSize, 0.0);
+	fftA.assign (bufferSize, 0.0);  //sebastien pour Fourier
 	
 	soundStream.printDeviceList();
 
@@ -57,7 +64,7 @@ void ofApp::setup(){
 
 	settings.setOutListener(this);
 	settings.sampleRate = sampleRate;
-	settings.numOutputChannels = 2;
+	settings.numOutputChannels = 1;
 	settings.numInputChannels = 0;
 	settings.bufferSize = bufferSize;
 	soundStream.setup(settings);
@@ -75,43 +82,21 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	ofSetColor(225);
-	ofDrawBitmapString("AUDIO OUTPUT EXAMPLE", 32, 32);
-	ofDrawBitmapString("press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
-	ofDrawBitmapString("\npress one key between WXCVBN, for a note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
+	ofDrawBitmapString("Synthétiseur ARTEK808 v0.1", 32, 32);
+	ofDrawBitmapString("Press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
+	ofDrawBitmapString("\nPress 'W', 'X', 'C', 'V','B','N', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
+	ofDrawBitmapString("\nPress 'q' for activate harmonies", 32, 118);
+	ofDrawBitmapString("\nPress 'f' for desactivate harmonies", 32, 131);
 	
 	ofNoFill();
 	
-	if (carre_bool){
-		ofPushStyle();
-		ofPushMatrix();
-		ofTranslate(32, 150, 0);
-			
-		ofSetColor(225);
-		ofDrawBitmapString("carre", 4, 18);
-		
-		ofSetLineWidth(1);	
-		ofDrawRectangle(0, 0, 900, 200);
-
-		ofSetColor(245, 58, 135);
-		ofSetLineWidth(3);
-					
-			ofBeginShape();
-			for (unsigned int i = 0; i < carre.size(); i++){
-				float x =  ofMap(i, 0, carre.size(), 0, 900, true);
-				ofVertex(x, 100 -carre[i]*180.0f);
-			}
-			ofEndShape(false);
-			
-		ofPopMatrix();
-		ofPopStyle();
-	}else{
 	// draw the left channel:
 	ofPushStyle();
 		ofPushMatrix();
 		ofTranslate(32, 150, 0);
 			
 		ofSetColor(225);
-		ofDrawBitmapString("Left Channel", 4, 18);
+		ofDrawBitmapString("Audio_Output", 4, 18);
 		
 		ofSetLineWidth(1);	
 		ofDrawRectangle(0, 0, 900, 200);
@@ -120,17 +105,17 @@ void ofApp::draw(){
 		ofSetLineWidth(3);
 					
 			ofBeginShape();
-			for (unsigned int i = 0; i < Audio.size(); i++){
-				float x =  ofMap(i, 0, Audio.size(), 0, 900, true);
-				ofVertex(x, 100 -Audio[i]*180.0f);
+			for (unsigned int i = 0; i < audio.size(); i++){
+				float x =  ofMap(i, 0, audio.size(), 0, 900, true);
+				ofVertex(x, 100 -audio[i]*180.0f);
 			}
 			ofEndShape(false);
 			
 		ofPopMatrix();
 	ofPopStyle();
-	}
 
-	// draw the right channel:
+
+	// draw the right channel:       // sebastien a mit son code pour la transformée de Fourier en affichage
 	/*
 	ofPushStyle();
 		ofPushMatrix();
@@ -142,13 +127,18 @@ void ofApp::draw(){
 		ofSetLineWidth(1);	
 		ofDrawRectangle(0, 0, 900, 200);
 
-		ofSetColor(245, 58, 135);
+		ofSetColor(145, 958, 35); // changement couleur
 		ofSetLineWidth(3);
 					
 			ofBeginShape();
-			for (unsigned int i = 0; i < rAudio.size(); i++){
-				float x =  ofMap(i, 0, rAudio.size(), 0, 900, true);
-				ofVertex(x, 100 -rAudio[i]*180.0f);
+
+			// appliquer la fft
+			fft(lAudio, sampleRate);
+			// cout << fftA[0] << endl;
+
+			for (unsigned int i = 0; i < fftA.size(); i++){
+				float x =  ofMap(i, 0, fftA.size(), 0, 900, true);
+				ofVertex(x, 100 - fftA[i]*720000000.0f);   // changer la constante en .0f pour avoir une échelle souhaitable
 			}
 			ofEndShape(false);
 			
@@ -157,18 +147,19 @@ void ofApp::draw(){
 	*/
 		
 	ofSetColor(225);
-	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
-	if( !bNoise ){
-		reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
-	}else{
-		reportString += "noise";	
-	}
+	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
+	//if( !bNoise ){
+	//	reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
+	//}else{
+	//	reportString += "noise";	
+	//}
 	ofDrawBitmapString(reportString, 32, 579);
 
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed  (int key){
+	/*
 	//gestion volume
 	if (key == '-' || key == '_' ){
 		volume -= 0.05;
@@ -177,14 +168,26 @@ void ofApp::keyPressed  (int key){
 		volume += 0.05;
 		volume = MIN(volume, 1);
 	}
-
+	*/
 	//gestion forme signal
 	if( key == 'q' ){
-		carre_bool = true;
+		signal_type=1;
 	}
 
 	if( key == 'f' ){
-		carre_bool = false;
+		signal_type=0;
+	}
+
+	if( key == 'd' ){
+		signal_type=2;
+	}
+
+	if( key == '+' ){
+		n_harmonics+=1;
+	}
+
+	if( key == '-' ){
+		n_harmonics-=1;
 	}
 	
 	//gestion pause
@@ -284,6 +287,10 @@ void ofApp::mouseExited(int x, int y){
 }
 
 //--------------------------------------------------------------
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY){
+
+}
+//--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
 
 }
@@ -299,29 +306,52 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 	while (phase > TWO_PI){
 		phase -= TWO_PI;
 	}
-	if (carre_bool){
+	//signal_type = 2;
+
+	if (signal_type==1){
 		float f_val = targetFrequency;
 		float dt = 1./float(sampleRate);
 		//Transformée de Fourier
-		for (size_t t = 0; t < buffer.getNumFrames(); t++){
+		for (size_t t = 0; t < 0+buffer.getNumFrames(); t++){
 			float S=0;
-			float t_val = t*dt;
-			for (size_t k = 0; k < 1000; k++){
+			float t_val = (t+t_start)*dt;
+			for (size_t k = 0; k < n_harmonics; k++){
 				S += 4./3.14f*sin((2*k+1)*6.28f*f_val*t_val)/(2*k+1)*volume;
 			}
 		
 			if (S>1){
-				carre[t] = buffer[t*buffer.getNumChannels()    ] = 1;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = 1;
 			}else if (S<-1){
-				carre[t] = buffer[t*buffer.getNumChannels()    ] = -1;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = -1;
 			}else{
-				carre[t] = buffer[t*buffer.getNumChannels()    ] = S;
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = S;
 			}
 		}
+		t_start = t_start+buffer.getNumFrames();
+	}else if (signal_type==2){
+		float f_val = targetFrequency;
+		float dt = 1./float(sampleRate);
+		//signal dents de scie
+		for (size_t t = 0; t < buffer.getNumFrames(); t++){
+			float S=0;
+			float t_val = (t+t_start)*dt;
+			for (size_t k = 1; k < n_harmonics; k++){
+				S += 2./3.14f*pow(-1.,k)*sin(k*6.28f*f_val*t_val)/k*volume;
+			}
+		
+			if (S>1){
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = 1;
+			}else if (S<-1){
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = -1;
+			}else{
+				audio[t] = buffer[t*buffer.getNumChannels()    ] = S;
+			}
+		}
+		t_start = t_start+buffer.getNumFrames();
 	}else if ( bNoise == true){
 		// ---------------------- noise --------------
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
-			Audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
+			audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
 			
 		}
 	} 
@@ -330,7 +360,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
 			phase += phaseAdder;
 			float sample = sin(phase);
-			Audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
+			audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
 
 		}
 	}
@@ -364,4 +394,23 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
+}
+//-----   Transformée de Fourier 
+void ofApp::fft(vector <float >lAudio, float sampleRate){
+    int maxVal = lAudio.size();
+    // fftA.assign (maxVal, 0.0);
+    const float pi = std::acos(-1);
+    const std::complex<float> i(0, 1);
+
+    for (int f = 0; f < maxVal; f++){
+        float ff = float(f) / static_cast<float>(2 * maxVal); // vu qu'on divise et multiplie par samplerate dans tt et ff; autant les changer
+		 													 // plus besoin de tt à la place de t, et plus de samplerate dans la formule de ff
+        std::complex<float> integral (0.0,0.0);
+
+        for(int t = 0; t < maxVal; t++){
+            integral += lAudio[t]  * std::exp(-2 * pi * i * ff * float(t) ) / sampleRate;
+			//cout << ff << " "<< integral <<" " << tt << endl;
+        }
+        fftA[f] = std::norm(integral);
+    }
 }
