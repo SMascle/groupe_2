@@ -33,6 +33,9 @@ class ofApp : public ofBaseApp{
 		float 	volume;
 		bool 	carre_bool;
 
+		int filter;
+		vector <float> vfilter;
+
 		vector <float> Audio;
 		vector <float> carre;
 

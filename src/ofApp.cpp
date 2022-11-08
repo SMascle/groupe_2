@@ -14,6 +14,9 @@ void ofApp::setup(){
 	bNoise 				= false;
 	carre_bool 			= false;
 
+	filter				=0;
+	vfilter.assign(bufferSize, 0.0);
+
 	Audio.assign(bufferSize, 0.0);
 	carre.assign(bufferSize, 0.0);
 	
@@ -166,6 +169,7 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed  (int key){
+	//gestion volume
 	if (key == '-' || key == '_' ){
 		volume -= 0.05;
 		volume = MAX(volume, 0);
@@ -174,6 +178,7 @@ void ofApp::keyPressed  (int key){
 		volume = MIN(volume, 1);
 	}
 
+	//gestion forme signal
 	if( key == 'q' ){
 		carre_bool = true;
 	}
@@ -182,6 +187,7 @@ void ofApp::keyPressed  (int key){
 		carre_bool = false;
 	}
 	
+	//gestion pause
 	if( key == 's' ){
 		soundStream.start();
 	}
@@ -189,7 +195,18 @@ void ofApp::keyPressed  (int key){
 	if( key == 'e' ){
 		soundStream.stop();
 	}
-	
+
+	//gestion filtres
+	if( key == 'l' ){
+		//l = passe-bas : on garde que les valeurs inferieures au seuil
+		filter = 1;
+	}
+	if( key == 'm' ){
+		//p = passe-haut : on garde que les valeurs superieur au seuil
+		filter = 2;
+	}
+
+	//gestion octave
 	if( key == 'w' ){
 		//do 261.6
 		targetFrequency = 261.6;
@@ -307,13 +324,33 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			Audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
 			
 		}
-	} else {
+	} 
+	else {
 		phaseAdder = 0.95f * phaseAdder + 0.05f * phaseAdderTarget;
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
 			phase += phaseAdder;
 			float sample = sin(phase);
 			Audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
 
+		}
+	}
+
+	if(filter=2){
+		for (int i=0; i < Audio.size() ; i++){
+			vfilter[i] = 0;
+		}
+		for (int i=0; i > Audio.size()*0.3; i++){
+			vfilter[i] = 1;
+			Audio[i] = Audio[i] * vfilter[i];
+		}
+	}
+	else if (filter=1){
+		for (int i=0; i< Audio.size(); i++){
+			vfilter[i] = 0;
+		}
+		for (int i=0; i< Audio.size()*0.3; i++){
+			vfilter[i] = 1;
+			Audio[i] = Audio[i] * vfilter[i];
 		}
 	}
 
