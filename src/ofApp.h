@@ -30,6 +30,7 @@ class ofApp : public ofBaseApp{
 		ofImage title;
 
 		vector <float> fftA;
+		float   octave; // variable du n° de l'octave.
 		float 	pan;
 		int		sampleRate;
 		bool 	bNoise;
