@@ -1,6 +1,6 @@
 #include "ofApp.h"
 #include <complex>  // besoin pour la transformée de Fourier
-
+#include <cmath> // besoin pour les exposants
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -17,7 +17,7 @@ void ofApp::setup(){
 	bNoise 				= false;
 	aNoise       		= 0;
 	signal_type         = 0;
-
+	octave              = 3.0; // on commence à la 3ème octave, comprise en tre 0 et 9.
 
 	t_start = 0;
 	n_harmonics = 10;
@@ -259,33 +259,54 @@ void ofApp::keyPressed  (int key){
 	}
 
 	//gestion octave
+
+	if( key == 'o'){
+		// touche pour diminuer d'une octave. On ne peut pas avoir une octave inférieur à 0.
+		if( octave > 0.0f){
+			octave = octave - 1.0f;
+			targetFrequency = targetFrequency / 2.0f; // Pour changer l'octave calculé il faut agir sur target frequency. Comme "la touche en cours" n'est
+														// pas en mémoire, on agit directement sur sa valeur ainsi. ça ne pose pas de problème quand on rentre
+															// une nouvelle touche.
+		} 
+		
+	}
+
+	if( key == 'p'){
+		// touche pour augmenter d'une octave. On ne peut pas avoir une octave supérieur à 9.
+		if( octave < 9.0f){
+			octave = octave + 1.0f;
+			targetFrequency = targetFrequency * 2.0f;
+		} 
+	}
+
+	//gestion touche clavier (lié à octave)
 	if( key == 'w' ){
-		//do 261.6
-		targetFrequency = 261.6;
+		//do 261.6 à l'octave 3, 32.70 à l'octave 0. 
+		targetFrequency = 32.70 * pow(2.0f, octave);
 	}
 	if( key == 'x' ){
-		//re 293.7
-		targetFrequency = 293.7;
+		//re 293.7 à l'octave 3, 36.71 à l'octave 0. 
+		targetFrequency = 36.71 * pow(2.0f, octave);
 	}
 	if( key == 'c' ){
-		//mi 329.6
-		targetFrequency = 329.6;
+		//mi 329.6 à l'octave 3, 41.20 à l'octave 0. 
+		targetFrequency = 41.2 * pow(2.0f, octave);;
 	}
 	if( key == 'v' ){
-		//fa 349.2
-		targetFrequency = 349.2;
+		//fa 349.2 à l'octave 3, 43.65 à l'octave 0. 
+		targetFrequency = 43.65 * pow(2.0f, octave);;
 	}
 	if( key == 'b' ){
-		//sol 392
-		targetFrequency = 392.0;
+		//sol 392 à l'octave 3, 49.00 à l'octave 0. 
+		targetFrequency = 49.0 * pow(2.0f, octave);;
 	}
 	if( key == 'n' ){
-		//la 440
-		targetFrequency = 440.0;
+		//la 440 à l'octave 3, 55.00 à l'octave 0. 
+		targetFrequency = 55.0 * pow(2.0f, octave);;
 	}
 	if( key == ',' ){
-		//si 493.9
-		targetFrequency = 493.9;
+		//si 493.9 à l'octave 3, 61.74 à l'octave 0. 
+		targetFrequency = 61.74 * pow(2.0f, octave);;
 	}
 	phaseAdderTarget = (targetFrequency / (float) sampleRate) * TWO_PI;
 }
