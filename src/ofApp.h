@@ -1,4 +1,4 @@
-#pragma once
+code #pragma once
 
 #include "ofMain.h"
 
@@ -26,6 +26,8 @@ class ofApp : public ofBaseApp{
 		void mouseScrolled(int x, int y, float scrollX, float scrollY);
 		void fft(vector <float> audio, float sampleRate);
 		
+		vector <float> filtre (vector <float> audio);
+
 		ofSoundStream soundStream;
 		ofImage title;
 
@@ -51,4 +53,7 @@ class ofApp : public ofBaseApp{
 		float 	phaseAdder;
 		float 	phaseAdderTarget;
 		float   ff; // ajout floatant ff
+
+		float fc = 11000;
+		float q = 0.5;
 };

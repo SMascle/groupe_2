@@ -234,6 +234,14 @@ void ofApp::keyPressed  (int key){
 		filter = 2;
 	}
 
+	if( key == OF_KEY_UP){
+		q += 0.2;
+	}
+
+	if( key == OF_KEY_DOWN){
+		q -= 0.2;
+	}
+
 	//gestion octave
 	if( key == 'w' ){
 		//do 261.6
@@ -285,10 +293,10 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-	/*
+	
 	int width = ofGetWidth();
 	pan = (float)x / (float)width;
-*/
+	fc = pan*22000;
 }
 
 //--------------------------------------------------------------
@@ -431,3 +439,38 @@ void ofApp::fft(vector <float >audio, float sampleRate){
         fftA[f] = std::norm(integral);
     }
 }
+
+//-----   Filtre Passe bBs et Filtre Passe Haut 
+
+vector <float>  ofapp::filtre (vector <float> audio) {
+
+
+	vector <float> out;
+
+	out.assign(audio.size(),0);
+
+    // function body (frequence d'échantillonnage = sampleRate)  
+	// Creation du filtre passe-bas
+
+
+    float w0 = 2* pi* (fc/sampleRate);
+	float alpha = (sin(w0))/(2*q);
+	
+	float b0 = alpha;
+	float b1 = 0;
+	float b2 = -alpha;
+	float a0 = 1 + alpha;
+	float a1 = -2*cos(w0);
+	float a2 = 1-alpha;
+
+	for(int t = 2; t < maxVal; t++){
+
+		out[t] = (b0/a0)*audio[t] + (b1/a0)*audio[t-1] + (b2/a0)*audio[t-2] - (a1/a0)*out[t-1]  - (a2/a0)*out[t-2] ;
+
+	}
+
+	return out;
+}
+
+
+
