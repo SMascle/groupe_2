@@ -25,11 +25,13 @@ class ofApp : public ofBaseApp{
 		void audioOut(ofSoundBuffer & buffer);
 		void mouseScrolled(int x, int y, float scrollX, float scrollY);
 		void fft(vector <float> audio, float sampleRate);
+		vector <float> filter(vector <float>audio, float sampleRate, ofSoundBuffer & buffer);
 		
 		ofSoundStream soundStream;
 		ofImage title;
 
-		vector <float> fftA;
+
+
 		float 	pan;
 		int		sampleRate;
 		bool 	bNoise;
@@ -37,14 +39,36 @@ class ofApp : public ofBaseApp{
 		int 	signal_type;
 		float   t_start;
 		size_t 	n_harmonics;
-
-		int filter;
-		vector <float> vfilter;
-
+		
 		vector <float> audio;
-		vector <float> carre;
+		vector <float> audio2;
+		vector <float> fftA;
+
+
+
+		//param filtre
+		int choice_filter;
+		
+		vector <float> audio_filtre;
+
+		float a, b, c, d, e;
+
+		float q;
+		float f0;
+		float Fs;
+
+		float omega;
+		float alpha;
+		
+		float b0;
+		float b1;
+		float b2;
+		float a0;
+		float a1;
+		float a2;
 
 		
+
 		//------------------- for the simple sine wave synthesis
 		float 	targetFrequency;
 		float 	phase;

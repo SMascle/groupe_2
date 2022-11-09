@@ -21,12 +21,13 @@ void ofApp::setup(){
 	t_start = 0;
 	n_harmonics = 10;
 
-	filter				=0;
-	vfilter.assign(bufferSize, 0.0);
+	choice_filter = 0;
+	
 
 	audio.assign(bufferSize, 0.0);
-	carre.assign(bufferSize, 0.0);
-	fftA.assign (bufferSize, 0.0);  //sebastien pour Fourier
+	audio2.assign(bufferSize, 0.0);
+	fftA.assign(bufferSize, 0.0);  			//sebastien pour Fourier
+	audio_filtre.assign(bufferSize, 0.0);	//pour les filtres
 	
 	soundStream.printDeviceList();
 
@@ -78,8 +79,6 @@ void ofApp::setup(){
 void ofApp::update(){
 
 }
-
-
 
 //--------------------------------------------------------------
 void ofApp::draw(){
@@ -227,11 +226,15 @@ void ofApp::keyPressed  (int key){
 	//gestion filtres
 	if( key == 'l' ){
 		//l = passe-bas : on garde que les valeurs inferieures au seuil
-		filter = 1;
+		choice_filter = 1;
 	}
 	if( key == 'm' ){
 		//p = passe-haut : on garde que les valeurs superieur au seuil
-		filter = 2;
+		choice_filter = 2;
+	}
+	if( key == 'k' ){
+		//annule filtre
+		choice_filter = 0;
 	}
 
 	//gestion octave
@@ -398,7 +401,18 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 		}
 	}
 
+	if (choice_filter == 1 ){
+	//passe bas
+		audio2 = filter(audio, sampleRate, buffer);
+		
+		for (size_t i = 0; i < buffer.getNumFrames(); i++){
+			audio[i] = buffer[i*buffer.getNumChannels()] = audio2[i] ;
+		}
+	}
+	else if (choice_filter == 2){
+	//pase haut
 
+	}
 
 }
 
@@ -412,8 +426,10 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
-//-----   Transformée de Fourier 
-void ofApp::fft(vector <float >audio, float sampleRate){
+
+//--------------------------------------------------------------   
+//Transformée de Fourier 
+void ofApp::fft(vector <float>audio, float sampleRate){
     int maxVal = audio.size();
     // fftA.assign (maxVal, 0.0);
     const float pi = std::acos(-1);
@@ -421,7 +437,7 @@ void ofApp::fft(vector <float >audio, float sampleRate){
 
     for (int f = 0; f < maxVal; f++){
         float ff = float(f) / static_cast<float>(2 * maxVal); // vu qu'on divise et multiplie par samplerate dans tt et ff; autant les changer
-		 													 // plus besoin de tt à la place de t, et plus de samplerate dans la formule de ff
+		 													  // plus besoin de tt à la place de t, et plus de samplerate dans la formule de ff
         std::complex<float> integral (0.0,0.0);
 
         for(int t = 0; t < maxVal; t++){
@@ -431,3 +447,39 @@ void ofApp::fft(vector <float >audio, float sampleRate){
         fftA[f] = std::norm(integral);
     }
 }
+
+
+//--------------------------------------------------------------
+//filtre le signal
+vector <float> ofApp::filter(vector <float>audio, float sampleRate, ofSoundBuffer & buffer){
+	float a=0, b=0, c=0,d=0, e=0;
+	audio_filtre[0]=0;
+	audio_filtre[1]=0;
+
+	q = 0.5;
+	f0 = 0.5;
+	Fs = sampleRate;
+
+	omega = 2 * M_PI * (f0/Fs);
+	alpha = sin( (omega)/(2*q) );
+	
+	b0 = alpha;
+	b1 = 0;
+	b2 = -1 * alpha;
+	a0 = 1 + alpha;
+	a1 = -2 * cos(omega);
+	a2 = 1-alpha;
+
+	a=(b0/a0);
+	b=(b1/a0);
+	c=(b2/a0);
+	d=(a1/a0);
+	e=(a2/a0);
+
+	for (int t=2; t < buffer.getNumFrames(); t++){
+		audio_filtre[t] = a*audio[t] + b*audio[t-1] + c*audio[t-2] - d*audio_filtre[t-1] - e*audio_filtre[t-2];
+	}
+
+	return audio_filtre;
+}
+
