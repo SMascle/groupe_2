@@ -7,7 +7,9 @@ void ofApp::setup(){
 
 	ofBackground(34, 34, 34);
 	title.load("title.png");
-	title.resize(280,220);
+	title.resize(300,250);
+	title2.load("title2.jpg");
+	title2.resize(300,250);
 	int bufferSize		= 512;
 	sampleRate 			= 44100;
 	phase 				= 0;
@@ -29,6 +31,18 @@ void ofApp::setup(){
 	audio2.assign(bufferSize, 0.0);
 	fftA.assign(bufferSize, 0.0);  			//sebastien pour Fourier
 	audio_filtre.assign(bufferSize, 0.0);	//pour les filtres
+
+	//Instanciation des couleurs :
+	cbool=true;
+	R = 51;
+	G = 255;
+	B = 51;
+	BG_R = 0;
+	BG_G = 0;
+	BG_B = 0;
+	P_R = 225;
+	P_G = 225;
+	P_B = 225;
 	
 	soundStream.printDeviceList();
 
@@ -84,40 +98,52 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	
-	ofSetColor(0, 255, 0);
-	ofBackground(0);
-	title.draw(800, 0);
-	//ofDrawBitmapString("Synthesizer ARTEK808 v0.5", 32, 32);
-	ofDrawBitmapString("Menu :",32, 50);
-	ofDrawBitmapString("Press 's' to unpause the audio",32, 67);
-	ofDrawBitmapString("Press 'e' to pause the audio", 32, 84);
-	ofDrawBitmapString("Press 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 101);
-	ofDrawBitmapString("Press 'q' for activate harmonies", 32, 118);
-	ofDrawBitmapString("Press 'f' for desactivate harmonies", 32, 135);
-	ofDrawBitmapString("Click to activate noise and press 'u' to reduce noise and 'i'  to increase it", 32, 145);
 	
-	ofDrawBitmapString("Parameters :", 32, 204);
-	ofDrawBitmapString("Noise :"+ofToString(aNoise, 2), 32, 221);
-	ofDrawBitmapString("Octave : ", 32, 238);
+	ofBackground(BG_R, BG_G, BG_B);
+	ofPushStyle();
+	ofSetColor(R, G, B);
+	//ofDrawBitmapString("Synthesizer ARTEK808 v0.5", 32, 32);
+	ofDrawBitmapString("Menu :",32, 20);
+	ofDrawBitmapString("Press s/e to un/pause the audio",32, 37);
+	ofDrawBitmapString("Press 'leftclick' to un/pause the noise", 32, 54);
+	ofDrawBitmapString("Press w, x, c, v, b, n to play note (Do-to-Si)", 32, 71);
+	//
+	ofDrawBitmapString("Press f/q/d for getting sine/harmonies/saw wave", 32, 88);
+	ofDrawBitmapString("Press o/p to increase/decrease octave", 32, 105);
+	ofDrawBitmapString("Press u/i to increase/decrease noise", 32, 122);
+	//filters
+	ofDrawBitmapString("Press k/l to de/activate filters", 32, 139);
+	ofDrawBitmapString("Move mouse to change cutoff frenquency", 32, 156);
+	ofDrawBitmapString("Press up/down to increase filter quality", 32, 173);
+	ofDrawBitmapString("Scroll to increase/decrease volume", 32, 190);
+
+	// activation l/k/ m si 2 filtres 
+
+	ofDrawBitmapString("Parameters :", 32, 250);
+	ofDrawBitmapString("Noise on : " +ofToString(bNoise, 2), 32, 267);
+	ofDrawBitmapString("Noise value : "+ofToString(aNoise, 2), 32, 284);
+	ofDrawBitmapString("Octave : "+ofToString(octave, 2), 32, 301);
+	ofDrawBitmapString("Volume: "+ofToString(volume, 2),  32, 318);
+	
 	ofNoFill();
 	
 	// draw the Audio channel:
 	ofPushStyle();
 		ofPushMatrix();
-		ofTranslate(32, 250, 0);
+		ofTranslate(32, 325, 0);
 			
-		ofSetColor(225);
+		ofSetColor(P_R, P_G, P_B);
 		ofDrawBitmapString("Audio_Output", 4, 18);
 		
 		ofSetLineWidth(1);	
-		ofDrawRectangle(0, 0, 900, 200);
+		ofDrawRectangle(0, 0, 1020, 200);
 
-		ofSetColor(245, 58, 135);
+		ofSetColor(R, G, B);
 		ofSetLineWidth(3);
 					
 			ofBeginShape();
 			for (unsigned int i = 0; i < audio.size(); i++){
-				float x =  ofMap(i, 0, audio.size(), 0, 900, true);
+				float x =  ofMap(i, 0, audio.size(), 0, 1020, true);
 				ofVertex(x, 100 -audio[i]*180.0f);
 			}
 			ofEndShape(false);
@@ -125,39 +151,19 @@ void ofApp::draw(){
 		ofPopMatrix();
 	ofPopStyle();
 
-	//draw 3rd window
-		ofPushStyle();
-		ofPushMatrix();
-		ofTranslate(932, 250, 0);
-			
-		ofSetColor(225);
-		ofDrawBitmapString("Harmonies", 4, 18);
-		
-		ofSetLineWidth(1);	
-		ofDrawRectangle(0, 0, 100, 400);
 
-		ofSetColor(145, 958, 35); // changement couleur
-		ofSetLineWidth(3);
-					
-			ofBeginShape();
-
-			ofEndShape(false);
-			
-		ofPopMatrix();
-	ofPopStyle();
-   
 	// sebastien a mit son code pour la transformée de Fourier en affichage
 	ofPushStyle();
 		ofPushMatrix();
-		ofTranslate(32, 450, 0);
+		ofTranslate(32, 525, 0);
 			
-		ofSetColor(225);
-		ofDrawBitmapString("Fourier Tranform", 4, 18);
+		ofSetColor(P_R, P_G, P_B);
+		ofDrawBitmapString("Fourier Transform", 4, 18);
 		
 		ofSetLineWidth(1);	
-		ofDrawRectangle(0, 0, 900, 200);
+		ofDrawRectangle(0, 0, 1020, 200);
 
-		ofSetColor(145, 958, 35); // changement couleur
+		ofSetColor(R, G, B); // changement couleur
 		ofSetLineWidth(3);
 					
 			ofBeginShape();
@@ -168,7 +174,7 @@ void ofApp::draw(){
 			// cout << fftA[0] << endl;
 
 			for (unsigned int i = 0; i < fftA.size(); i++){
-				float x =  ofMap(i, 0, fftA.size(), 0, 900, true);
+				float x =  ofMap(i, 0, fftA.size(), 0, 1020, true);
 				float y =  ofMap(fftA[i], 0, max_fftA, 0, 165, true);
 				ofVertex(x, 190 - y);   // changer la constante en .0f pour avoir une échelle souhaitable
 			}
@@ -178,17 +184,16 @@ void ofApp::draw(){
 	ofPopStyle();
 
 		
-	ofSetColor(0, 255, 0);
-	
-	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ mouse scrolling";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
-	//if( !bNoise ){
-	//	reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
-	//}else{
-	//	reportString += "noise";	
-	//}
-	ofDrawBitmapString(reportString, 32, 700);
+	ofSetColor(R, G, B);
+	ofDrawBitmapString("For change theme press 1 or 2", 32, 750);
 	string reportString2 = "ArTek808, all right reserved ©";
 	ofDrawBitmapString(reportString2, 790, 750);
+	ofPopStyle();
+	if (cbool){
+		title.draw(800, 0);
+	}else{
+		title2.draw(800, 0);}
+
 }
 
 //--------------------------------------------------------------
@@ -291,8 +296,8 @@ void ofApp::keyPressed  (int key){
 	}
 
 	if( key == 'p'){
-		// touche pour augmenter d'une octave. On ne peut pas avoir une octave supérieur à 9.
-		if( octave < 9.0f){
+		// touche pour augmenter d'une octave. On ne peut pas avoir une octave supérieur à 11.
+		if( octave < 11.0f){
 			octave = octave + 1.0f;
 			targetFrequency = targetFrequency * 2.0f;
 		} 
@@ -328,6 +333,34 @@ void ofApp::keyPressed  (int key){
 		targetFrequency = 61.74 * pow(2.0f, octave);;
 	}
 	phaseAdderTarget = (targetFrequency / (float) sampleRate) * TWO_PI;
+
+	// Changement de theme :
+
+		if( key == '1' ){
+			cbool = true;
+			R = 51;
+			G = 255;
+			B = 51;
+			BG_R = 0;
+			BG_G = 0;
+			BG_B = 0;
+			P_R = 225;
+			P_G = 225;
+			P_B = 225;
+
+	}
+		if( key == '2' ){
+			cbool=false;
+			R = 153;
+			G = 0;
+			B = 0;
+			BG_R = 255;
+			BG_G = 145;
+			BG_B = 77;
+			P_R = 32;
+			P_G = 32;
+			P_B = 32;
+	}
 }
 
 //--------------------------------------------------------------

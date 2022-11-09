@@ -29,6 +29,7 @@ class ofApp : public ofBaseApp{
 		
 		ofSoundStream soundStream;
 		ofImage title;
+		ofImage title2;
 
 
 
@@ -67,6 +68,18 @@ class ofApp : public ofBaseApp{
 
 		float at1=0, at2=0,	af1=0, af2=0; 
 
+		// Variable changement de theme :
+		int R;
+		int G;
+		int B;
+		int	BG_R;
+		int	BG_G;
+		int BG_B;
+		int P_R;
+		int P_G;
+		int P_B;
+		bool cbool;
+		//-------------------------------
 		
 
 		//------------------- for the simple sine wave synthesis
