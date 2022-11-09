@@ -95,9 +95,10 @@ void ofApp::draw(){
 	ofDrawBitmapString("Press 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 101);
 	ofDrawBitmapString("Press 'q' for activate harmonies", 32, 118);
 	ofDrawBitmapString("Press 'f' for desactivate harmonies", 32, 135);
+	ofDrawBitmapString("Click to activate noise and press 'u' to reduce noise and 'i'  to increase it", 32, 145);
 	
 	ofDrawBitmapString("Parameters :", 32, 204);
-	ofDrawBitmapString("Noise :", 32, 221);
+	ofDrawBitmapString("Noise :"+ofToString(aNoise, 2), 32, 221);
 	ofDrawBitmapString("Octave : ", 32, 238);
 	ofNoFill();
 	
