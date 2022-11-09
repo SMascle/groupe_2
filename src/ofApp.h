@@ -37,6 +37,7 @@ class ofApp : public ofBaseApp{
 		int 	signal_type;
 		float   t_start;
 		size_t 	n_harmonics;
+		float   aNoise;
 
 		int filter;
 		vector <float> vfilter;
