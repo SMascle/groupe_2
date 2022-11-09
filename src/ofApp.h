@@ -27,6 +27,7 @@ class ofApp : public ofBaseApp{
 		void fft(vector <float> audio, float sampleRate);
 		
 		ofSoundStream soundStream;
+		ofImage title;
 
 		vector <float> fftA;
 		float 	pan;

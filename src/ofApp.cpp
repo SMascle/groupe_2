@@ -6,7 +6,8 @@
 void ofApp::setup(){
 
 	ofBackground(34, 34, 34);
-	
+	title.load("title.png");
+	title.resize(250,200);
 	int bufferSize		= 512;
 	sampleRate 			= 44100;
 	phase 				= 0;
@@ -78,12 +79,15 @@ void ofApp::update(){
 
 }
 
+
+
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+	
 	ofSetColor(0, 255, 0);
 	ofBackground(0);
-	ofDrawBitmapString("Synthesizer ARTEK808 v0.5", 32, 32);
+	title.draw(800, 0);
+	//ofDrawBitmapString("Synthesizer ARTEK808 v0.5", 32, 32);
 	ofDrawBitmapString("Press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
 	ofDrawBitmapString("\nPress 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
 	ofDrawBitmapString("\nPress 'q' for activate harmonies", 32, 118);
@@ -91,10 +95,10 @@ void ofApp::draw(){
 	
 	ofNoFill();
 	
-	// draw the left channel:
+	// draw the Audio channel:
 	ofPushStyle();
 		ofPushMatrix();
-		ofTranslate(32, 150, 0);
+		ofTranslate(32, 250, 0);
 			
 		ofSetColor(225);
 		ofDrawBitmapString("Audio_Output", 4, 18);
@@ -115,15 +119,34 @@ void ofApp::draw(){
 		ofPopMatrix();
 	ofPopStyle();
 
+	//draw 3rd window
+		ofPushStyle();
+		ofPushMatrix();
+		ofTranslate(932, 250, 0);
+			
+		ofSetColor(225);
+		ofDrawBitmapString("Harmonies", 4, 18);
+		
+		ofSetLineWidth(1);	
+		ofDrawRectangle(0, 0, 100, 400);
 
-	// draw the right channel:       
+		ofSetColor(145, 958, 35); // changement couleur
+		ofSetLineWidth(3);
+					
+			ofBeginShape();
+
+			ofEndShape(false);
+			
+		ofPopMatrix();
+	ofPopStyle();
+   
 	// sebastien a mit son code pour la transformée de Fourier en affichage
 	ofPushStyle();
 		ofPushMatrix();
-		ofTranslate(32, 350, 0);
+		ofTranslate(32, 450, 0);
 			
 		ofSetColor(225);
-		ofDrawBitmapString("Right Channel", 4, 18);
+		ofDrawBitmapString("Fourier Tranform", 4, 18);
 		
 		ofSetLineWidth(1);	
 		ofDrawRectangle(0, 0, 900, 200);
@@ -139,7 +162,7 @@ void ofApp::draw(){
 
 			for (unsigned int i = 0; i < fftA.size(); i++){
 				float x =  ofMap(i, 0, fftA.size(), 0, 900, true);
-				ofVertex(x, 100 - fftA[i]*720000000.0f);   // changer la constante en .0f pour avoir une échelle souhaitable
+				ofVertex(x, 180 - fftA[i]*720000000.0f);   // changer la constante en .0f pour avoir une échelle souhaitable
 			}
 			ofEndShape(false);
 			
@@ -148,13 +171,14 @@ void ofApp::draw(){
 
 		
 	ofSetColor(225);
+	
 	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
 	//if( !bNoise ){
 	//	reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
 	//}else{
 	//	reportString += "noise";	
 	//}
-	ofDrawBitmapString(reportString, 32, 579);
+	ofDrawBitmapString(reportString, 32, 700);
 
 }
 
