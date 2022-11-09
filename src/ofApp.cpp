@@ -112,9 +112,9 @@ void ofApp::draw(){
 	ofDrawBitmapString("Press o/p to increase/decrease octave", 32, 105);
 	ofDrawBitmapString("Press u/i to increase/decrease noise", 32, 122);
 	//filters
-	ofDrawBitmapString("Drag mouse to apply filters", 32, 139);
-	ofDrawBitmapString("Press l/k/m  to ...", 32, 156);
-	ofDrawBitmapString("Press up/down to increase filter frequency", 32, 173);
+	ofDrawBitmapString("Press k/l to de/activate filters", 32, 139);
+	ofDrawBitmapString("Move mouse to change cutoff frenquency", 32, 156);
+	ofDrawBitmapString("Press up/down to increase filter quality", 32, 173);
 	ofDrawBitmapString("Scroll to increase/decrease volume", 32, 190);
 
 	// activation l/k/ m si 2 filtres 
