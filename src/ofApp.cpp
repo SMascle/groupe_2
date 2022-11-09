@@ -7,7 +7,7 @@ void ofApp::setup(){
 
 	ofBackground(34, 34, 34);
 	title.load("title.png");
-	title.resize(250,200);
+	title.resize(280,220);
 	int bufferSize		= 512;
 	sampleRate 			= 44100;
 	phase 				= 0;
@@ -89,11 +89,16 @@ void ofApp::draw(){
 	ofBackground(0);
 	title.draw(800, 0);
 	//ofDrawBitmapString("Synthesizer ARTEK808 v0.5", 32, 32);
-	ofDrawBitmapString("Press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
-	ofDrawBitmapString("\nPress 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
-	ofDrawBitmapString("\nPress 'q' for activate harmonies", 32, 118);
-	ofDrawBitmapString("\nPress 'f' for desactivate harmonies", 32, 131);
+	ofDrawBitmapString("Menu :",32, 50);
+	ofDrawBitmapString("Press 's' to unpause the audio",32, 67);
+	ofDrawBitmapString("Press 'e' to pause the audio", 32, 84);
+	ofDrawBitmapString("Press 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 101);
+	ofDrawBitmapString("Press 'q' for activate harmonies", 32, 118);
+	ofDrawBitmapString("Press 'f' for desactivate harmonies", 32, 135);
 	
+	ofDrawBitmapString("Parameters :", 32, 204);
+	ofDrawBitmapString("Noise :", 32, 221);
+	ofDrawBitmapString("Octave : ", 32, 238);
 	ofNoFill();
 	
 	// draw the Audio channel:
@@ -159,11 +164,13 @@ void ofApp::draw(){
 
 			// appliquer la fft
 			fft(audio, sampleRate);
+			float max_fftA = *max_element(fftA.begin(), fftA.end());
 			// cout << fftA[0] << endl;
 
 			for (unsigned int i = 0; i < fftA.size(); i++){
 				float x =  ofMap(i, 0, fftA.size(), 0, 900, true);
-				ofVertex(x, 180 - fftA[i]*720000000.0f);   // changer la constante en .0f pour avoir une échelle souhaitable
+				float y =  ofMap(fftA[i], 0, max_fftA, 0, 165, true);
+				ofVertex(x, 190 - y);   // changer la constante en .0f pour avoir une échelle souhaitable
 			}
 			ofEndShape(false);
 			
@@ -171,16 +178,17 @@ void ofApp::draw(){
 	ofPopStyle();
 
 		
-	ofSetColor(225);
+	ofSetColor(0, 255, 0);
 	
-	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
+	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ mouse scrolling";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
 	//if( !bNoise ){
 	//	reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
 	//}else{
 	//	reportString += "noise";	
 	//}
 	ofDrawBitmapString(reportString, 32, 700);
-
+	string reportString2 = "ArTek808, all right reserved ©";
+	ofDrawBitmapString(reportString2, 790, 750);
 }
 
 //--------------------------------------------------------------
