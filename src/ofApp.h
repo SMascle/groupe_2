@@ -31,6 +31,7 @@ class ofApp : public ofBaseApp{
 		ofImage title;
 
 
+
 		float   octave; // variable du n° de l'octave.
 		float 	pan;
 		int		sampleRate;
@@ -40,10 +41,6 @@ class ofApp : public ofBaseApp{
 		float   t_start;
 		size_t 	n_harmonics;
 		float   aNoise;
-
-		int filter;
-		vector <float> vfilter;
-
 		
 		vector <float> audio;
 		vector <float> audio2;
@@ -51,26 +48,24 @@ class ofApp : public ofBaseApp{
 
 
 
+		//----
 		//param filtre
 		int choice_filter;
-		
 		vector <float> audio_filtre;
-
 		float a, b, c, d, e;
-
-		float q;
-		float f0;
+		float q=0.5;
+		float f0=8000;
 		float Fs;
-
 		float omega;
 		float alpha;
-		
 		float b0;
 		float b1;
 		float b2;
 		float a0;
 		float a1;
 		float a2;
+
+		float at1=0, at2=0,	af1=0, af2=0; 
 
 		
 

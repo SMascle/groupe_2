@@ -260,6 +260,22 @@ void ofApp::keyPressed  (int key){
 		//annule filtre
 		choice_filter = 0;
 	}
+	
+	if( key == OF_KEY_UP){
+		q += 0.1;
+		if(q>=1){
+			q=0.8;
+		}
+	}
+
+	if( key == OF_KEY_DOWN){
+		q -= 0.1;
+		if(q<=0){
+			q=0.2;
+		}
+	}
+
+
 
 	//gestion octave
 
@@ -329,6 +345,9 @@ void ofApp::mouseMoved(int x, int y ){
 	targetFrequency = 2000.0f * heightPct;
 	phaseAdderTarget = (targetFrequency / (float) sampleRate) * TWO_PI;
 */	
+	int width = ofGetWidth();
+	pan = (float)x / (float)width;
+	f0 = 10 + pan*8000;
 }
 
 //--------------------------------------------------------------
@@ -336,6 +355,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 	/*
 	int width = ofGetWidth();
 	pan = (float)x / (float)width;
+	f0 = pan*22000;
 */
 }
 
@@ -508,8 +528,8 @@ vector <float> ofApp::filter(vector <float>audio, float sampleRate, ofSoundBuffe
 	audio_filtre[0]=0;
 	audio_filtre[1]=0;
 
-	q = 0.5;
-	f0 = 0.5;
+	//q = 0.5;
+	//f0 = 11000;
 	Fs = sampleRate;
 
 	omega = 2 * M_PI * (f0/Fs);
@@ -528,8 +548,12 @@ vector <float> ofApp::filter(vector <float>audio, float sampleRate, ofSoundBuffe
 	d=(a1/a0);
 	e=(a2/a0);
 
-	for (int t=2; t < buffer.getNumFrames(); t++){
-		audio_filtre[t] = a*audio[t] + b*audio[t-1] + c*audio[t-2] - d*audio_filtre[t-1] - e*audio_filtre[t-2];
+	for (int t=0; t < buffer.getNumFrames(); t++){
+		audio_filtre[t] = a*audio[t] + b*at1 + c*at2 - d*af1 - e*af2;
+		at2 = at1;
+		at1 = audio[t];
+		af2 = af1;
+		af1 = audio_filtre[t];
 	}
 
 	return audio_filtre;
