@@ -15,6 +15,7 @@ void ofApp::setup(){
 	phaseAdderTarget 	= 0.0f;
 	volume				= 0.1f;
 	bNoise 				= false;
+	aNoise       		= 0;
 	signal_type         = 0;
 
 
@@ -94,9 +95,10 @@ void ofApp::draw(){
 	ofDrawBitmapString("Press 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 101);
 	ofDrawBitmapString("Press 'q' for activate harmonies", 32, 118);
 	ofDrawBitmapString("Press 'f' for desactivate harmonies", 32, 135);
+	ofDrawBitmapString("Click to activate noise and press 'u' to reduce noise and 'i'  to increase it", 32, 145);
 	
 	ofDrawBitmapString("Parameters :", 32, 204);
-	ofDrawBitmapString("Noise :", 32, 221);
+	ofDrawBitmapString("Noise :"+ofToString(aNoise, 2), 32, 221);
 	ofDrawBitmapString("Octave : ", 32, 238);
 	ofNoFill();
 	
@@ -203,6 +205,20 @@ void ofApp::keyPressed  (int key){
 	}
 	*/
 	//gestion forme signal
+	if( key == 'i' ){
+		aNoise+=0.05;
+		/*if (aNoise>=1){
+			aNoise=1;
+		}*/
+	}
+
+	if( key == 'u' ){
+		aNoise-=0.05;
+		if (aNoise<0){
+			aNoise=0;
+		}
+	}
+
 	if( key == 'q' ){
 		signal_type=1;
 	}
@@ -301,12 +317,18 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-	bNoise = true;
+	if (bNoise == false){
+		bNoise = true;
+		if (aNoise==0){
+			aNoise=0.05;
+		}
+	}else{
+		bNoise = false;
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-	bNoise = false;
 }
 
 //--------------------------------------------------------------
@@ -357,7 +379,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			float S=0;
 			float t_val = (t+t_start)*dt;
 			for (size_t k = 0; k < n_harmonics; k++){
-				S += 4./3.14f*sin((2*k+1)*6.28f*f_val*t_val)/(2*k+1)*volume;
+				S += 4./3.14f*sin((2*k+1)*6.28f*f_val*t_val)/(2*k+1)*volume;//*(1-aNoise)
 			}
 		
 			if (S>1){
@@ -377,7 +399,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			float S=0;
 			float t_val = (t+t_start)*dt;
 			for (size_t k = 1; k < n_harmonics; k++){
-				S += 2./3.14f*pow(-1.,k)*sin(k*6.28f*f_val*t_val)/k*volume;
+				S += 2./3.14f*pow(-1.,k)*sin(k*6.28f*f_val*t_val)/k*volume;//*(1-aNoise)
 			}
 		
 			if (S>1){
@@ -389,23 +411,23 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			}
 		}
 		t_start = t_start+buffer.getNumFrames();
-	}else if ( bNoise == true){
-		// ---------------------- noise --------------
-		for (size_t i = 0; i < buffer.getNumFrames(); i++){
-			audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
-			
-		}
-	} 
-	else {
+	}else {
 		phaseAdder = 0.95f * phaseAdder + 0.05f * phaseAdderTarget;
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
 			phase += phaseAdder;
 			float sample = sin(phase);
-			audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
+			audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume; //*(1-aNoise);* leftScale;
 
 		}
 	}
 
+	if ( bNoise == true){
+		// ---------------------- noise --------------
+		for (size_t i = 0; i < buffer.getNumFrames(); i++){
+			audio[i] = buffer[i*buffer.getNumChannels()    ] += ofRandom(0, 1)* aNoise * volume; // * leftScale;
+			
+		}
+	} 
 
 
 }
