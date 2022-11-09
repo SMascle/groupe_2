@@ -1,13 +1,13 @@
 #include "ofApp.h"
 #include <complex>  // besoin pour la transformée de Fourier
-
+#include <cmath> // besoin pour les exposants
 
 //--------------------------------------------------------------
 void ofApp::setup(){
 
 	ofBackground(34, 34, 34);
 	title.load("title.png");
-	title.resize(250,200);
+	title.resize(280,220);
 	int bufferSize		= 512;
 	sampleRate 			= 44100;
 	phase 				= 0;
@@ -15,8 +15,9 @@ void ofApp::setup(){
 	phaseAdderTarget 	= 0.0f;
 	volume				= 0.1f;
 	bNoise 				= false;
+	aNoise       		= 0;
 	signal_type         = 0;
-
+	octave              = 3.0; // on commence à la 3ème octave, comprise en tre 0 et 9.
 
 	t_start = 0;
 	n_harmonics = 10;
@@ -87,11 +88,17 @@ void ofApp::draw(){
 	ofBackground(0);
 	title.draw(800, 0);
 	//ofDrawBitmapString("Synthesizer ARTEK808 v0.5", 32, 32);
-	ofDrawBitmapString("Press 's' to unpause the audio\npress 'e' to pause the audio", 32, 92);
-	ofDrawBitmapString("\nPress 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 105);
-	ofDrawBitmapString("\nPress 'q' for activate harmonies", 32, 118);
-	ofDrawBitmapString("\nPress 'f' for desactivate harmonies", 32, 131);
+	ofDrawBitmapString("Menu :",32, 50);
+	ofDrawBitmapString("Press 's' to unpause the audio",32, 67);
+	ofDrawBitmapString("Press 'e' to pause the audio", 32, 84);
+	ofDrawBitmapString("Press 'w', 'x', 'c', 'v','b','n', for play note Do-Re-Mi-Fa-Sol-La-Si", 32, 101);
+	ofDrawBitmapString("Press 'q' for activate harmonies", 32, 118);
+	ofDrawBitmapString("Press 'f' for desactivate harmonies", 32, 135);
+	ofDrawBitmapString("Click to activate noise and press 'u' to reduce noise and 'i'  to increase it", 32, 145);
 	
+	ofDrawBitmapString("Parameters :", 32, 204);
+	ofDrawBitmapString("Noise :"+ofToString(aNoise, 2), 32, 221);
+	ofDrawBitmapString("Octave : ", 32, 238);
 	ofNoFill();
 	
 	// draw the Audio channel:
@@ -157,11 +164,13 @@ void ofApp::draw(){
 
 			// appliquer la fft
 			fft(audio, sampleRate);
+			float max_fftA = *max_element(fftA.begin(), fftA.end());
 			// cout << fftA[0] << endl;
 
 			for (unsigned int i = 0; i < fftA.size(); i++){
 				float x =  ofMap(i, 0, fftA.size(), 0, 900, true);
-				ofVertex(x, 180 - fftA[i]*720000000.0f);   // changer la constante en .0f pour avoir une échelle souhaitable
+				float y =  ofMap(fftA[i], 0, max_fftA, 0, 165, true);
+				ofVertex(x, 190 - y);   // changer la constante en .0f pour avoir une échelle souhaitable
 			}
 			ofEndShape(false);
 			
@@ -169,16 +178,17 @@ void ofApp::draw(){
 	ofPopStyle();
 
 		
-	ofSetColor(225);
+	ofSetColor(0, 255, 0);
 	
-	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ keys";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
+	string reportString = "volume: ("+ofToString(volume, 2)+") modify with -/+ mouse scrolling";//\npan: ("+ofToString(pan, 2)+") modify with mouse x\nsynthesis: ";
 	//if( !bNoise ){
 	//	reportString += "sine wave (" + ofToString(targetFrequency, 2) + "hz) modify with mouse y";
 	//}else{
 	//	reportString += "noise";	
 	//}
 	ofDrawBitmapString(reportString, 32, 700);
-
+	string reportString2 = "ArTek808, all right reserved ©";
+	ofDrawBitmapString(reportString2, 790, 750);
 }
 
 //--------------------------------------------------------------
@@ -194,6 +204,20 @@ void ofApp::keyPressed  (int key){
 	}
 	*/
 	//gestion forme signal
+	if( key == 'i' ){
+		aNoise+=0.05;
+		/*if (aNoise>=1){
+			aNoise=1;
+		}*/
+	}
+
+	if( key == 'u' ){
+		aNoise-=0.05;
+		if (aNoise<0){
+			aNoise=0;
+		}
+	}
+
 	if( key == 'q' ){
 		signal_type=1;
 	}
@@ -238,33 +262,54 @@ void ofApp::keyPressed  (int key){
 	}
 
 	//gestion octave
+
+	if( key == 'o'){
+		// touche pour diminuer d'une octave. On ne peut pas avoir une octave inférieur à 0.
+		if( octave > 0.0f){
+			octave = octave - 1.0f;
+			targetFrequency = targetFrequency / 2.0f; // Pour changer l'octave calculé il faut agir sur target frequency. Comme "la touche en cours" n'est
+														// pas en mémoire, on agit directement sur sa valeur ainsi. ça ne pose pas de problème quand on rentre
+															// une nouvelle touche.
+		} 
+		
+	}
+
+	if( key == 'p'){
+		// touche pour augmenter d'une octave. On ne peut pas avoir une octave supérieur à 9.
+		if( octave < 9.0f){
+			octave = octave + 1.0f;
+			targetFrequency = targetFrequency * 2.0f;
+		} 
+	}
+
+	//gestion touche clavier (lié à octave)
 	if( key == 'w' ){
-		//do 261.6
-		targetFrequency = 261.6;
+		//do 261.6 à l'octave 3, 32.70 à l'octave 0. 
+		targetFrequency = 32.70 * pow(2.0f, octave);
 	}
 	if( key == 'x' ){
-		//re 293.7
-		targetFrequency = 293.7;
+		//re 293.7 à l'octave 3, 36.71 à l'octave 0. 
+		targetFrequency = 36.71 * pow(2.0f, octave);
 	}
 	if( key == 'c' ){
-		//mi 329.6
-		targetFrequency = 329.6;
+		//mi 329.6 à l'octave 3, 41.20 à l'octave 0. 
+		targetFrequency = 41.2 * pow(2.0f, octave);;
 	}
 	if( key == 'v' ){
-		//fa 349.2
-		targetFrequency = 349.2;
+		//fa 349.2 à l'octave 3, 43.65 à l'octave 0. 
+		targetFrequency = 43.65 * pow(2.0f, octave);;
 	}
 	if( key == 'b' ){
-		//sol 392
-		targetFrequency = 392.0;
+		//sol 392 à l'octave 3, 49.00 à l'octave 0. 
+		targetFrequency = 49.0 * pow(2.0f, octave);;
 	}
 	if( key == 'n' ){
-		//la 440
-		targetFrequency = 440.0;
+		//la 440 à l'octave 3, 55.00 à l'octave 0. 
+		targetFrequency = 55.0 * pow(2.0f, octave);;
 	}
 	if( key == ',' ){
-		//si 493.9
-		targetFrequency = 493.9;
+		//si 493.9 à l'octave 3, 61.74 à l'octave 0. 
+		targetFrequency = 61.74 * pow(2.0f, octave);;
 	}
 	phaseAdderTarget = (targetFrequency / (float) sampleRate) * TWO_PI;
 }
@@ -296,12 +341,18 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-	bNoise = true;
+	if (bNoise == false){
+		bNoise = true;
+		if (aNoise==0){
+			aNoise=0.05;
+		}
+	}else{
+		bNoise = false;
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-	bNoise = false;
 }
 
 //--------------------------------------------------------------
@@ -352,7 +403,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			float S=0;
 			float t_val = (t+t_start)*dt;
 			for (size_t k = 0; k < n_harmonics; k++){
-				S += 4./3.14f*sin((2*k+1)*6.28f*f_val*t_val)/(2*k+1)*volume;
+				S += 4./3.14f*sin((2*k+1)*6.28f*f_val*t_val)/(2*k+1)*volume;//*(1-aNoise)
 			}
 		
 			if (S>1){
@@ -372,7 +423,7 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			float S=0;
 			float t_val = (t+t_start)*dt;
 			for (size_t k = 1; k < n_harmonics; k++){
-				S += 2./3.14f*pow(-1.,k)*sin(k*6.28f*f_val*t_val)/k*volume;
+				S += 2./3.14f*pow(-1.,k)*sin(k*6.28f*f_val*t_val)/k*volume;//*(1-aNoise)
 			}
 		
 			if (S>1){
@@ -384,22 +435,23 @@ void ofApp::audioOut(ofSoundBuffer & buffer){
 			}
 		}
 		t_start = t_start+buffer.getNumFrames();
-	}else if ( bNoise == true){
-		// ---------------------- noise --------------
-		for (size_t i = 0; i < buffer.getNumFrames(); i++){
-			audio[i] = buffer[i*buffer.getNumChannels()    ] = ofRandom(0, 1) * volume; // * leftScale;
-			
-		}
-	} 
-	else {
+	}else {
 		phaseAdder = 0.95f * phaseAdder + 0.05f * phaseAdderTarget;
 		for (size_t i = 0; i < buffer.getNumFrames(); i++){
 			phase += phaseAdder;
 			float sample = sin(phase);
-			audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume ; //* leftScale;
+			audio[i] = buffer[i*buffer.getNumChannels()    ] = sample * volume; //*(1-aNoise);* leftScale;
 
 		}
 	}
+
+	if ( bNoise == true){
+		// ---------------------- noise --------------
+		for (size_t i = 0; i < buffer.getNumFrames(); i++){
+			audio[i] = buffer[i*buffer.getNumChannels()    ] += ofRandom(0, 1)* aNoise * volume; // * leftScale;
+			
+		}
+	} 
 
 	if (choice_filter == 1 ){
 	//passe bas

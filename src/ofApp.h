@@ -31,7 +31,7 @@ class ofApp : public ofBaseApp{
 		ofImage title;
 
 
-
+		float   octave; // variable du n° de l'octave.
 		float 	pan;
 		int		sampleRate;
 		bool 	bNoise;
@@ -39,6 +39,11 @@ class ofApp : public ofBaseApp{
 		int 	signal_type;
 		float   t_start;
 		size_t 	n_harmonics;
+		float   aNoise;
+
+		int filter;
+		vector <float> vfilter;
+
 		
 		vector <float> audio;
 		vector <float> audio2;
